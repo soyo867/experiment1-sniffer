@@ -116,8 +116,9 @@ class SnifferApp:
         self.nav_buttons = {}
         for label,expr in [("全部数据包",""),("HTTP","http"),("TCP","tcp"),("UDP","udp"),("IPv4","ipv4"),("IPv6","ipv6"),("ICMP / ICMPv6","icmp or icmpv6"),("DNS","dns"),("TLS","tls"),("ARP","arp")]:
             button = tk.Button(sidebar,text=label,command=lambda e=expr:self.set_filter(e),anchor="w",bg=WHITE,fg=INK,
-                               activebackground="#e5f3f2",activeforeground=ACCENT,relief="flat",padx=16,pady=3,cursor="hand2")
-            button.pack(fill="x",padx=7,pady=1)
+                               activebackground="#e5f3f2",activeforeground=ACCENT,relief="flat",padx=16,pady=1,
+                               font=("Microsoft YaHei UI",9),cursor="hand2")
+            button.pack(fill="x",padx=7,pady=0)
             self.nav_buttons[expr] = button
         tk.Frame(sidebar,bg=LINE,height=1).pack(fill="x",padx=16,pady=13)
         self.total_label = tk.Label(sidebar,text="0",font=("Segoe UI",23,"bold"),bg=WHITE,fg=INK)
@@ -150,6 +151,7 @@ class SnifferApp:
         self.notebook.add(self.stats_tab,text="流量统计")
         self.notebook.bind("<<NotebookTabChanged>>",self._tab_changed)
         pane = ttk.Panedwindow(self.packet_tab,orient="vertical")
+        self.packet_pane = pane
         pane.pack(fill="both",expand=True,pady=(2,0))
         packet_frame = ttk.Frame(pane)
         pane.add(packet_frame,weight=3)
@@ -191,11 +193,12 @@ class SnifferApp:
         self.stats_canvas.pack(fill="both",expand=True)
         self.stats_canvas.bind("<Configure>",lambda _:self.draw_stats())
         footer = tk.Frame(self.root,bg=WHITE,height=31)
-        footer.pack(fill="x")
+        footer.pack(side="bottom",fill="x",before=main)
         self.status = tk.StringVar(value="就绪")
         tk.Label(footer,textvariable=self.status,bg=WHITE,fg=MUTED,anchor="w",padx=18,pady=6,font=("Microsoft YaHei UI",9)).pack(side="left",fill="x",expand=True)
         self.drop_label = tk.Label(footer,text="驱动丢包 —  ·  队列丢包 0",bg=WHITE,fg=MUTED,padx=18,font=("Microsoft YaHei UI",9))
         self.drop_label.pack(side="right")
+        self.root.after(350,lambda:self.packet_pane.sashpos(0,int(self.packet_pane.winfo_height()*0.53)))
 
     def _scroll_tree(self,parent,tree):
         parent.rowconfigure(0,weight=1)
@@ -440,7 +443,8 @@ class SnifferApp:
         self.detail_tree.delete(*self.detail_tree.get_children())
         self.layer_ranges = {}
         for i,layer in enumerate(p.layers):
-            item = self.detail_tree.insert("","end",text=layer.name,values=(f"bytes {layer.start}..{max(layer.start,layer.end-1)}",),open=True)
+            item = self.detail_tree.insert("","end",text=layer.name,values=(f"bytes {layer.start}..{max(layer.start,layer.end-1)}",),
+                                           open=layer.name in (p.protocol,"Diagnostics"))
             self.layer_ranges[item] = (layer.start,layer.end)
             for key,value in layer.fields.items():
                 self.detail_tree.insert(item,"end",text=key,values=(str(value),))
