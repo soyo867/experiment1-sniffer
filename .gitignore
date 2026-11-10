@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+deliverables/
+evidence/*.mp4
+evidence/report_pages/
+evidence/*.log
+*.tmp

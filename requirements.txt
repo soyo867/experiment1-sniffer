@@ -1,0 +1,4 @@
+# Core GUI, packet capture, parsing and PCAP I/O use Python's standard library.
+# Install Npcap separately on Windows: https://npcap.com/
+# Optional process-to-connection association:
+psutil>=5.9,<8
