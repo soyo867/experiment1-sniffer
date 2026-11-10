@@ -112,6 +112,8 @@ class SnifferApp:
         sidebar = tk.Frame(main,bg=WHITE,width=184,highlightbackground=LINE,highlightthickness=1)
         sidebar.pack(side="left",fill="y",padx=(0,12))
         sidebar.pack_propagate(False)
+        actions = tk.Frame(sidebar,bg=WHITE)
+        actions.pack(side="bottom",fill="x",pady=(5,10))
         tk.Label(sidebar,text="协议导航",font=("Microsoft YaHei UI",12,"bold"),bg=WHITE,fg=INK).pack(anchor="w",padx=16,pady=(17,8))
         self.nav_buttons = {}
         for label,expr in [("全部数据包",""),("HTTP","http"),("TCP","tcp"),("UDP","udp"),("IPv4","ipv4"),("IPv6","ipv6"),("ICMP / ICMPv6","icmp or icmpv6"),("DNS","dns"),("TLS","tls"),("ARP","arp")]:
@@ -126,9 +128,9 @@ class SnifferApp:
         tk.Label(sidebar,text="已保留数据包",bg=WHITE,fg=MUTED,font=("Microsoft YaHei UI",9)).pack(anchor="w",padx=16)
         self.volume_label = tk.Label(sidebar,text="0 B  ·  0 TCP 流",bg=WHITE,fg=MUTED,font=("Microsoft YaHei UI",9))
         self.volume_label.pack(anchor="w",padx=16,pady=(7,12))
-        ttk.Button(sidebar,text="加载内置样例",command=self.load_demo).pack(fill="x",padx=12,pady=(0,7))
-        ttk.Button(sidebar,text="产生回环测试流量",command=self.generate_traffic).pack(fill="x",padx=12,pady=(0,7))
-        ttk.Button(sidebar,text="使用帮助",command=self.show_help).pack(fill="x",padx=12)
+        ttk.Button(actions,text="加载内置样例",command=self.load_demo).pack(fill="x",padx=12,pady=(0,7))
+        ttk.Button(actions,text="产生回环测试流量",command=self.generate_traffic).pack(fill="x",padx=12,pady=(0,7))
+        ttk.Button(actions,text="使用帮助",command=self.show_help).pack(fill="x",padx=12)
         self.body = ttk.Frame(main)
         self.body.pack(side="left",fill="both",expand=True)
         filters = ttk.Frame(self.body,padding=(0,0,0,8))

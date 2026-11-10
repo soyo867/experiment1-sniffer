@@ -1,0 +1,6 @@
+reading from file /mnt/f/软件系统与安全/实验1A_嗅探器/evidence/live_loopback.pcap, link-type EN10MB (Ethernet), snapshot length 1048576
+14:31:59.280408 IP 127.0.0.1.55248 > 127.0.0.1.18080: Flags [S], seq 3165492838, win 65495, options [mss 65495,sackOK,TS val 3522150466 ecr 0,nop,wscale 10], length 0
+14:31:59.282038 IP 127.0.0.1.18080 > 127.0.0.1.55248: Flags [S.], seq 1625871898, ack 3165492839, win 65483, options [mss 65495,sackOK,TS val 2004755539 ecr 3522150466,nop,wscale 10], length 0
+14:31:59.282448 IP 127.0.0.1.55248 > 127.0.0.1.18080: Flags [.], ack 1, win 64, options [nop,nop,TS val 3522150469 ecr 2004755539], length 0
+14:31:59.283081 IP 127.0.0.1.55248 > 127.0.0.1.18080: Flags [P.], seq 1:131, ack 1, win 64, options [nop,nop,TS val 3522150470 ecr 2004755539], length 130
+14:31:59.283102 IP 127.0.0.1.18080 > 127.0.0.1.55248: Flags [.], ack 131, win 64, options [nop,nop,TS val 2004755540 ecr 3522150470], length 0
