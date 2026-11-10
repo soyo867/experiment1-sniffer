@@ -1,0 +1,8 @@
+* text=auto
+*.py text eol=lf
+*.bat text eol=crlf
+*.pcap binary
+*.pcapng binary
+*.png binary
+*.pdf binary
+*.mp4 binary

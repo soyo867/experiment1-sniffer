@@ -1,0 +1,106 @@
+#0  127.0.0.1:55248  ↔  127.0.0.1:18080
+Packets: 47
+
+A → B
+Overlap=0 Conflict=0 Gaps=0
+GET /experiment/1a?request=1 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=2 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=3 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=4 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=5 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=6 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=7 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+GET /experiment/1a?request=8 HTTP/1.1
+Host: 127.0.0.1:18080
+Accept-Encoding: identity
+User-Agent: WireScope-Controlled-Test
+
+
+
+B → A
+Overlap=0 Conflict=0 Gaps=0
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:31:59 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:31:59 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:00 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:00 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:01 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:01 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:02 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.10.12
+Date: Tue, 10 Nov 2026 06:32:02 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 55
+
+WireScope Experiment 1A: real loopback packet capture.
+

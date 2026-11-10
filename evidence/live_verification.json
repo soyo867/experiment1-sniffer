@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "backend": "WSL Ubuntu-22.04 / libpcap version 1.10.1 (with TPACKET_V3)（抓取 WSL 网络）",
+  "interface": "lo",
+  "capture_scope": "WSL loopback",
+  "packet_count": 47,
+  "protocol_counts": {
+    "TCP": 31,
+    "HTTP": 16
+  },
+  "http_requests": 8,
+  "http_responses": 8,
+  "tcp_flows": 1,
+  "stop_latency_seconds": 0.078,
+  "idle_stop_latency_seconds": 0.078,
+  "invalid_bpf_rejected": true,
+  "pcap_roundtrip": true,
+  "statistics": {
+    "received": 94,
+    "kernel_dropped": 0,
+    "interface_dropped": 0,
+    "queue_dropped": 0
+  },
+  "process_associated_packets": 0
+}

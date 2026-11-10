@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "checks": [
+    "load synthetic fixture in packet table",
+    "HTTP navigation filter",
+    "invalid filter preserves previous result",
+    "packet selection, details, hex, flow reassembly and sequence chart",
+    "filtered export and asynchronous reopen",
+    "GUI live start, local test traffic, packet delivery, stop",
+    "statistics visualization"
+  ],
+  "live_packets": 47,
+  "tk_callback_errors": []
+}
