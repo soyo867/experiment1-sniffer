@@ -52,13 +52,21 @@ def main():
                "-draw_mouse","0","-i","title=WireScope Experiment 1A Demo","-vf","scale=1440:-2",
                "-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-movflags","+faststart",
                str(evidence/"ex1A_play.mp4")]
-    process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=log,stderr=log,creationflags=subprocess.CREATE_NO_WINDOW,
-                               env={**os.environ,"__COMPAT_LAYER":"HIGHDPIAWARE"})
+    process = None
+    lead_in = 30  # Allow the desktop to foreground the recording window before capture.
+    def begin_recording():
+        nonlocal process
+        root.lift()
+        root.focus_force()
+        root.update_idletasks()
+        process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=log,stderr=log,creationflags=subprocess.CREATE_NO_WINDOW,
+                                   env={**os.environ,"__COMPAT_LAYER":"HIGHDPIAWARE"})
+    root.after(lead_in*1000,begin_recording)
     def banner(n,text):
         step.configure(text=f"{n:02d} / 12")
         caption.configure(text=text)
     def at(seconds,callback):
-        root.after(int(seconds*1000),callback)
+        root.after(int((lead_in+seconds)*1000),callback)
     def select_packet(number,focus=None):
         app.packet_tree.selection_set(str(number))
         app.packet_tree.see(str(number))
