@@ -5,6 +5,7 @@ the app window, so this is an actual running-program demo, not a slide video.
 """
 import argparse
 import ctypes
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -23,6 +24,10 @@ def main():
     base = Path(__file__).resolve().parent.parent
     evidence = base/"evidence"
     evidence.mkdir(exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', default=str(evidence/'ex1A_play.mp4'))
+    args = parser.parse_args()
+    output = Path(args.out)
     # A DPI-aware recording window prevents GDI from mixing logical and physical pixels.
     if os.name == "nt":
         try:
@@ -40,7 +45,7 @@ def main():
     caption_frame = tk.Frame(root,bg="#d9eeed",height=62)
     caption_frame.pack(fill="x",before=app.body.master)
     caption_frame.pack_propagate(False)
-    step = tk.Label(caption_frame,text="01 / 12",font=("Segoe UI",14,"bold"),bg="#d9eeed",fg="#087f8c")
+    step = tk.Label(caption_frame,text="01 / 14",font=("Segoe UI",14,"bold"),bg="#d9eeed",fg="#087f8c")
     step.pack(side="left",padx=(24,18))
     caption = tk.Label(caption_frame,text="实验 1A：真实抓包、协议分析与 TCP 流追踪",font=("Microsoft YaHei UI",13,"bold"),bg="#d9eeed",fg="#142b45")
     caption.pack(side="left")
@@ -51,7 +56,7 @@ def main():
     command = [imageio_ffmpeg.get_ffmpeg_exe(),"-hide_banner","-y","-f","gdigrab","-framerate","12",
                "-draw_mouse","0","-i","title=WireScope Experiment 1A Demo","-vf","scale=1440:-2",
                "-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-movflags","+faststart",
-               str(evidence/"ex1A_play.mp4")]
+               str(output)]
     process = None
     lead_in = 30  # Allow the desktop to foreground the recording window before capture.
     def begin_recording():
@@ -63,7 +68,7 @@ def main():
                                    env={**os.environ,"__COMPAT_LAYER":"HIGHDPIAWARE"})
     root.after(lead_in*1000,begin_recording)
     def banner(n,text):
-        step.configure(text=f"{n:02d} / 12")
+        step.configure(text=f"{n:02d} / 14")
         caption.configure(text=text)
     def at(seconds,callback):
         root.after(int((lead_in+seconds)*1000),callback)
@@ -123,9 +128,27 @@ def main():
         app.set_filter("tls")
         select_packet(20,"TLS")
     def stats():
-        banner(12,"统计、文件导出与测试证据随源码和实验报告一同提交")
+        banner(12,"捕获统计：协议分布、数据量与 TCP 流数量")
         app.notebook.select(app.stats_tab)
         app.draw_stats()
+    def process_flows():
+        banner(13,"进程实抓证据回放：同一 PID 的两条 TCP 流（附原始包与 PID sidecar）")
+        packets = read_capture(evidence/'process_capture.pcapng')
+        owners = json.loads((evidence/'process_capture_owners.json').read_text(encoding='utf-8'))
+        for packet in packets:
+            packet.process = owners.get(str(packet.number),'')
+        app.set_filter('')
+        app.load_packets(packets,'真实进程多流捕获回放 · PID 来自同次捕获的 owners sidecar')
+        app.notebook.select(app.process_tab)
+        app.refresh_processes()
+        if len(app.process_tree.get_children()) != 2:
+            raise RuntimeError('Process demo must show both captured TCP flows')
+    def process_follow():
+        banner(14,"选择进程中的任一流，继续查看双向载荷与请求路径")
+        selected = app.process_tree.get_children()[1]
+        app.process_tree.selection_set(selected)
+        app.follow_process_flow()
+        app.flow_tabs.select(0)
     def finish():
         if app.session:
             app.stop_capture()
@@ -150,9 +173,11 @@ def main():
     at(78,dns)
     at(88,tls)
     at(98,stats)
-    at(108,finish)
+    at(108,process_flows)
+    at(118,process_follow)
+    at(128,finish)
     root.mainloop()
-    print("Demo recording complete:",evidence/"ex1A_play.mp4")
+    print("Demo recording complete:",output)
 
 
 if __name__ == "__main__":

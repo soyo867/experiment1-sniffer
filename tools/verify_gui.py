@@ -87,8 +87,27 @@ def run():
         pump(0.1)
         assert app.stats_canvas.find_all()
         checks.append("statistics visualization")
+        live_packets = len(app.packets)
+        evidence = Path(__file__).resolve().parent.parent/'evidence'
+        owners = json.loads((evidence/'process_capture_owners.json').read_text(encoding='utf-8'))
+        packets = read_capture(evidence/'process_capture.pcapng')
+        for packet in packets:
+            packet.process = owners.get(str(packet.number),'')
+        app.load_packets(packets,'实抓进程证据回放（PID 来自同次捕获 sidecar）')
+        app.notebook.select(app.process_tab)
+        app.refresh_processes()
+        pump(0.1)
+        ids = app.process_tree.get_children()
+        assert len(ids) == 2, ids
+        for flow_id in ids:
+            app.process_tree.selection_set(flow_id)
+            app.follow_process_flow()
+            pump(0.1)
+            assert app.current_flow.id == int(flow_id)
+            assert 'GET /process-stream-' in ''.join(t.get('1.0','end') for t in app.flow_texts)
+        checks.append('process evidence replay: same PID lists both TCP flows and opens each stream')
         assert not callback_errors,callback_errors
-        result = {"result":"PASS","checks":checks,"live_packets":len(app.packets),"tk_callback_errors":callback_errors}
+        result = {"result":"PASS","checks":checks,"live_packets":live_packets,"process_flows":len(ids),"tk_callback_errors":callback_errors}
         (Path(__file__).resolve().parent.parent/"evidence/gui_verification.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
         print(json.dumps(result,ensure_ascii=False,indent=2))
     finally:

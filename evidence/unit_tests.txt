@@ -50,8 +50,19 @@ test_out_of_order_retransmission (test_core.StreamTests.test_out_of_order_retran
 test_sequence_wrap (test_core.StreamTests.test_sequence_wrap) ... ok
 test_syn_consumes_one_sequence (test_core.StreamTests.test_syn_consumes_one_sequence) ... ok
 test_tuple_reuse_new_syn (test_core.StreamTests.test_tuple_reuse_new_syn) ... ok
+test_big_endian (test_processes.EndpointTests.test_big_endian) ... ok
+test_ipv4_little_endian (test_processes.EndpointTests.test_ipv4_little_endian) ... ok
+test_ipv6_word_order (test_processes.EndpointTests.test_ipv6_word_order) ... ok
+test_malformed_endpoint (test_processes.EndpointTests.test_malformed_endpoint) ... ok
+test_exact_bidirectional_tcp_only (test_processes.ResolverTests.test_exact_bidirectional_tcp_only) ... ok
+test_failed_snapshot_clears_stale_ownership (test_processes.ResolverTests.test_failed_snapshot_clears_stale_ownership) ... ok
+test_linux_fallback_and_snapshot_interval (test_processes.ResolverTests.test_linux_fallback_and_snapshot_interval) ... ok
+test_ipv4_multiple_owners_sorted_and_deduplicated (test_processes.SnapshotTests.test_ipv4_multiple_owners_sorted_and_deduplicated) ... ok
+test_ipv6_missing_ipv4_table (test_processes.SnapshotTests.test_ipv6_missing_ipv4_table) ... ok
+test_listener_zero_inode_and_malformed_rows_ignored (test_processes.SnapshotTests.test_listener_zero_inode_and_malformed_rows_ignored) ... ok
+test_vanished_and_unrelated_fds (test_processes.SnapshotTests.test_vanished_and_unrelated_fds) ... ok
 
 ----------------------------------------------------------------------
-Ran 52 tests in 0.164s
+Ran 63 tests in 0.284s
 
 OK

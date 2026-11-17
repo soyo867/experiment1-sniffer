@@ -2,7 +2,9 @@
   "width": 1440,
   "height": 862,
   "fps": 12.0,
-  "frames": 1297,
-  "duration_seconds": 108.08,
-  "source": "actual GUI window recording; controlled loopback traffic plus labelled synthetic fixtures"
+  "frames": 1536,
+  "duration_seconds": 128.0,
+  "source": "actual GUI window recording; controlled loopback traffic, labelled synthetic fixtures, and real process-capture replay with same-run PID sidecar",
+  "full_decode": "PASS",
+  "chapters": 14
 }

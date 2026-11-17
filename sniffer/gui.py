@@ -151,6 +151,21 @@ class SnifferApp:
         self.notebook.add(self.packet_tab,text="数据包浏览")
         self.notebook.add(self.flow_tab,text="TCP 流追踪")
         self.notebook.add(self.stats_tab,text="流量统计")
+        self.process_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.process_tab,text="进程的全部 TCP 流")
+        pt = ttk.Frame(self.process_tab,padding=8)
+        pt.pack(fill='x')
+        self.process_choice = ttk.Combobox(pt,state='readonly',width=50)
+        self.process_choice.pack(side='left',fill='x',expand=True)
+        ttk.Button(pt,text='刷新进程',command=self.refresh_processes).pack(side='left',padx=8)
+        self.process_choice.bind('<<ComboboxSelected>>',lambda _:self.show_process())
+        ttk.Label(self.process_tab,text='来自实时 socket 快照；列出选中进程关联的全部已捕获 TCP 流。离线 PCAP 不含 PID。',padding=8).pack(fill='x')
+        pf=ttk.Frame(self.process_tab); pf.pack(fill='both',expand=True)
+        self.process_tree=ttk.Treeview(pf,columns=('id','a','b','packets'),show='headings')
+        for key,title,width in [('id','流 ID',70),('a','端点 A',280),('b','端点 B',280),('packets','包数',80)]:
+            self.process_tree.heading(key,text=title); self.process_tree.column(key,width=width)
+        self._scroll_tree(pf,self.process_tree)
+        self.process_tree.bind('<Double-1>',lambda _:self.follow_process_flow())
         self.notebook.bind("<<NotebookTabChanged>>",self._tab_changed)
         pane = ttk.Panedwindow(self.packet_tab,orient="vertical")
         self.packet_pane = pane
@@ -550,6 +565,33 @@ class SnifferApp:
                 self.show_flow(0)
         elif self.notebook.select() == str(self.stats_tab):
             self.draw_stats()
+        elif self.notebook.select() == str(self.process_tab):
+            self.refresh_processes()
+
+    def refresh_processes(self):
+        names=sorted({name for p in self.packets for name in p.process.split('; ') if name})
+        previous=self.process_choice.get()
+        self.process_choice.configure(values=names)
+        if previous in names:
+            self.process_choice.set(previous)
+        elif names:
+            self.process_choice.current(0)
+        else:
+            self.process_choice.set('')
+        self.show_process()
+
+    def show_process(self):
+        self.process_tree.delete(*self.process_tree.get_children())
+        name=self.process_choice.get()
+        for flow in self.flow_index.flows:
+            if name and any(name in p.process.split('; ') for p in flow.packets):
+                self.process_tree.insert('','end',iid=str(flow.id),values=(flow.id,endpoint(*flow.a),endpoint(*flow.b),len(flow.packets)))
+
+    def follow_process_flow(self):
+        selected=self.process_tree.selection()
+        if selected:
+            self.notebook.select(self.flow_tab)
+            self.show_flow(int(selected[0]))
 
     def draw_stats(self):
         c = self.stats_canvas
@@ -706,7 +748,7 @@ tcp and port == 8080           协议与端口
 ip.addr == 127.0.0.1           任一 IP 端点
 tcp.stream == 0               追踪指定 TCP 连接
 info contains "GET"            摘要包含文本
-process contains "python"      本机 socket 快照关联（可选 psutil）
+process contains "python"      本机 socket 快照关联（psutil / Linux proc）
 端口不等于条件要求两端均不等于；缺失字段不匹配。
 
 保存与重组

@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import queue
 import socket
+import sys
 import threading
 import time
 
@@ -141,7 +142,7 @@ class Pcap:
 
 
 class ProcessResolver:
-    """Optional psutil socket snapshots, exact TCP tuple matching only."""
+    """psutil or Linux /proc socket snapshots, exact TCP tuple matching only."""
     def __init__(self):
         self.mapping, self.updated, self.status = {}, 0.0, "进程关联未启用"
         try:
@@ -152,9 +153,19 @@ class ProcessResolver:
             self.psutil = None
 
     def refresh(self):
-        if self.psutil is None or time.monotonic()-self.updated < 1.0:
+        if time.monotonic()-self.updated < 0.5:
             return
         self.updated = time.monotonic()
+        if self.psutil is None:
+            if sys.platform.startswith('linux'):
+                from .processes import linux_socket_snapshot
+                try:
+                    self.mapping = linux_socket_snapshot()
+                    self.status = '进程关联：Linux /proc 精确 TCP socket 快照'
+                except OSError as exc:
+                    self.mapping = {}
+                    self.status = '进程快照不可用：'+str(exc)
+            return
         try:
             result, names = {}, {}
             for conn in self.psutil.net_connections(kind="tcp"):
@@ -169,6 +180,7 @@ class ProcessResolver:
                 result[key] = names[conn.pid]
             self.mapping = result
         except (self.psutil.Error,OSError) as exc:
+            self.mapping = {}
             self.status = "进程快照不可用："+str(exc)
 
     def resolve(self, p):

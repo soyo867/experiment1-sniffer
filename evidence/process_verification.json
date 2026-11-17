@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "pid": 1105,
+  "flow_count": 2,
+  "associated_packets": 14,
+  "backend": "libpcap version 1.10.1 (with TPACKET_V3)",
+  "method": "Linux /proc exact TCP tuple and socket inode ownership",
+  "flows": [
+    {
+      "id": 0,
+      "a": [
+        "127.0.0.1",
+        33176
+      ],
+      "b": [
+        "127.0.0.1",
+        49721
+      ],
+      "packets": 7
+    },
+    {
+      "id": 1,
+      "a": [
+        "127.0.0.1",
+        33184
+      ],
+      "b": [
+        "127.0.0.1",
+        49721
+      ],
+      "packets": 7
+    }
+  ]
+}

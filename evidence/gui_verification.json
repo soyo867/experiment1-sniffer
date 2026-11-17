@@ -7,8 +7,10 @@
     "packet selection, details, hex, flow reassembly and sequence chart",
     "filtered export and asynchronous reopen",
     "GUI live start, local test traffic, packet delivery, stop",
-    "statistics visualization"
+    "statistics visualization",
+    "process evidence replay: same PID lists both TCP flows and opens each stream"
   ],
   "live_packets": 47,
+  "process_flows": 2,
   "tk_callback_errors": []
 }

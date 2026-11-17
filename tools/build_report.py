@@ -24,6 +24,7 @@ def build(output=None,metadata=None):
     live = json.loads((BASE/"evidence/live_verification.json").read_text(encoding="utf-8"))
     unit = json.loads((BASE/"evidence/unit_tests.json").read_text(encoding="utf-8"))
     gui = json.loads((BASE/"evidence/gui_verification.json").read_text(encoding="utf-8"))
+    process = json.loads((BASE/"evidence/process_verification.json").read_text(encoding="utf-8"))
     font_dir = Path("C:/Windows/Fonts")
     regular,bold = font_dir/"msyh.ttc",font_dir/"msyhbd.ttc"
     if not regular.exists():
@@ -99,11 +100,11 @@ def build(output=None,metadata=None):
         ("带 GUI 的 NPS（第 5、9 页）","网卡选择、开始/停止、实时列表、PCAP 保存；真实回环捕获通过"),
         ("NPA 协议分析（第 9 页）","链路/IP/TCP/UDP/ICMP 分层字段；HTTP、DNS、TLS 元数据；Hex/ASCII"),
         ("协议过滤（第 14 页）","BPF 捕获过滤 + 带 and/or/not/括号的显示过滤"),
-        ("TCP 流追踪加分（第 14 页）","双向五元组索引、序列重组、缺口/冲突提示、时序图、文本导出"),
+        ("TCP 流追踪加分（第 14 页）","双向五元组索引、重组与时序图；选择进程列出其全部已捕获 TCP 流，实测 2 条"),
         ("libpcap/Npcap（第 15 页）","ctypes 调用系统 API；未调用 Scapy、tshark 的解析逻辑"),
         ("提交物（第 2、3 页）","源码、MP4 演示、PDF 报告、ZIP；个人字段和远程 Git 地址待补全")
     ],[152,WIDTH-152])
-    p(f"验证摘要：{unit['tests']} 项单元测试通过；真实捕获 {live['packet_count']} 包，8 个 HTTP 请求与 8 个响应；GUI 功能检查通过。", "body")
+    p(f"验证摘要：{unit['tests']} 项单元测试通过；原 HTTP 实抓 {live['packet_count']} 包；新增进程实抓关联 {process['associated_packets']} 包 / {process['flow_count']} 条 TCP 流；GUI 功能检查通过。", "body")
     p("本报告区分真实回环捕获与内置合成样例。当前环境实测后台为 WSL Ubuntu-22.04；Windows Npcap 原生路径已实现，当前机器未安装该驱动。","small")
 
     page("01  实验原理与抓包层次")
@@ -141,6 +142,7 @@ def build(output=None,metadata=None):
     p("捕获句柄只由一个后台线程持有、读取和关闭。通过 pcap_setnonblock 避免无包时阻塞；停止动作设置 Event，工作线程退出循环并在 finally 关闭句柄。Tk 主线程每 80 ms 消费一批包，更新列表；文件读取也在后台执行。数据队列满时丢弃新增包并计数，界面可显示内核与应用队列的不同丢包来源。")
     table(["源码模块","职责"],[
         ("capture.py / wslbridge.py","ctypes API、接口枚举、BPF、捕获生命周期；WSL 本地管道桥接"),
+        ("processes.py","Linux /proc 端点、socket inode 与 PID 关联；Windows 使用可选 psutil"),
         ("protocols.py / model.py","有界字段解析、Packet/Layer 模型、Hex 输出"),
         ("filters.py / streams.py","递归下降过滤器；双向连接索引与序列号重组"),
         ("pcapio.py / samples.py","PCAP/PCAPNG 读写；可重复生成的合成样例"),
@@ -191,15 +193,25 @@ def build(output=None,metadata=None):
     screenshot("gui_stream.png","图 2　同一 TCP 连接的请求字节重组。界面同时提供另一方向的响应内容和连接时序标签。",265)
     p("三栏浏览器把包列表、协议字段和原始字节联系起来。选择协议层会高亮对应的十六进制行；双击 TCP 包进入对应连接。表格显示最近 2,000 条匹配记录，保存全部与导出筛选都使用完整的保留数据。","small")
 
-    page("06  测试方法与实验结果")
-    p(f"测试环境：Windows / Python {unit['python']}，Tk GUI；{escape(live['backend'])}。真实测试仅在 127.0.0.1:18080 发送本地 HTTP 请求。")
+    page("06  加分项：进程的全部 TCP 流")
+    p("进程面板按进程名称和 PID 汇总已捕获流。选择一个进程后，列表给出该进程关联的每条 TCP 连接及包数；双击任一行即可进入双向载荷与时序图。它复用原有连接索引，不把同一进程的不同端口连接合并。")
+    screenshot("gui_process.png","图 3　真实进程捕获证据回放：同一 Python PID 的两条独立 TCP 流。PCAPNG 提供原始包，PID 由同次捕获的 owners sidecar 恢复。",250)
+    h("从 socket 到数据包的关联")
+    p("Windows 在安装 psutil 后读取 TCP socket 表；Linux 没有 psutil 时读取 /proc/net/tcp 与 tcp6，再用 /proc/PID/fd 的 socket inode 找到进程。快照按完整本地/远端 IP 和端口匹配，并检查反向端点。监听端口、无 inode 项和消失的文件描述符不会产生归属记录。")
+    p(f"新增实测在 WSL 回环中，由 PID {process['pid']} 建立两条连接，分别发送 /process-stream-0 与 /process-stream-1 请求。结果为 {process['flow_count']} 条流、{process['associated_packets']} 个关联包；GUI 自动测试进一步验证两条列表项都能打开正确的重组内容。")
+    h("证据范围")
+    p("这组结果来自 process_verification.json、process_capture.pcapng 与 process_capture_owners.json，独立于原来的 47 包 HTTP 测试。标准 PCAP/PCAPNG 文件不含进程信息；演示中的 PID 回放明确使用同次采集的 sidecar，并非从离线包推断 PID。短连接与采样间隔仍可能导致遗漏；“全部”指该进程关联的全部已捕获流。", "small")
+
+    page("07  测试方法与实验结果")
+    p(f"测试环境：Windows / Python {unit['python']}，Tk GUI；{escape(live['backend'])}。原 HTTP 测试使用 127.0.0.1:18080；新增进程测试使用回环随机端口。")
     table(["测试组","方法","实际结果"],[
-        ("单元测试","协议、过滤、重组、文件格式共 52 项","52 通过；0 失败；0 错误"),
+        ("单元测试",f"协议、过滤、重组、文件格式与进程解析共 {unit['tests']} 项",f"{unit['tests']} 通过；0 失败；0 错误"),
         ("截断与随机输入","每个合成包的全部截断位置；固定种子 3,000 随机帧","未出现未捕获解析异常"),
         ("真实 NPS / HTTP","启动 libpcap；发送 8 次回环请求","47 包；HTTP 请求 8，响应 8；1 条流"),
         ("停止与错误处理","空闲网卡停止；非法 BPF","停止成功；非法 BPF 被拒绝"),
         ("抓包与文件互通","PCAP、PCAPNG 写出/回读；tcpdump 读取 PCAP","原始字节一致；tcpdump 正常显示握手"),
-        ("GUI 集成","真实 Tk 控件执行 7 组功能检查","通过；Tk 回调异常 0；GUI 捕获 47 包")
+        ("进程多流关联","同一 PID 建立两条回环 TCP 连接",f"{process['flow_count']} 条流；{process['associated_packets']} 个关联包"),
+        ("GUI 集成",f"真实 Tk 控件执行 {len(gui['checks'])} 组检查，含进程列表/逐流打开",f"通过；Tk 回调异常 0；GUI 捕获 {gui['live_packets']} 包")
     ],[88,227,WIDTH-315])
     h("真实捕获指标")
     table(["指标","测量值"],[
@@ -208,24 +220,24 @@ def build(output=None,metadata=None):
         ("捕获停止耗时",f"{live['stop_latency_seconds']:.3f} s（本次测量）"),
         ("空闲状态停止耗时",f"{live['idle_stop_latency_seconds']:.3f} s（本次测量）"),
         ("libpcap received 计数",str(live['statistics']['received'])+"；Linux 回环计数可能包含收/发两次，不能直接作为 GUI 包数"),
-        ("进程关联",f"本次 {live['process_associated_packets']} 包；WSL 环境未验证该可选功能")
+        ("原 HTTP 测试的进程关联",f"原记录为 {live['process_associated_packets']} 包；新增独立进程实测见上一页")
     ],[197,WIDTH-197])
-    p("证据位于 evidence/：unit_tests.txt、unit_tests.json、live_verification.json、gui_verification.json、live_loopback.pcap、live_loopback.pcapng 和 live_tcp_stream.txt。上述小流量测试用于验证功能与停止路径，不代表高速网络吞吐能力。","small")
+    p("证据位于 evidence/：unit_tests.*、live_verification.json、gui_verification.json、live_loopback.pcap/pcapng、live_tcp_stream.txt，以及 process_verification.json 与 process_capture*。这些小流量测试验证功能与停止路径，不代表高速网络吞吐能力。","small")
 
-    page("07  安装、运行与复现")
+    page("08  安装、运行与复现")
     h("当前 Windows 电脑直接运行")
     p("双击“启动嗅探器.bat”，或在源码目录执行下列命令。核心程序仅依赖 Python 3.10+ 标准库和 Tk；当前电脑已有 Python 与 WSL/libpcap，无需再安装依赖即可使用已验证后台。")
     code("python run.py\npython run.py --demo\npython run.py --open evidence/live_loopback.pcapng")
     h("在其他机器上运行")
     p("Windows 主机网卡抓包需先从 Npcap 官网安装驱动；若安装为仅管理员捕获，需由用户使用相应权限运行。GUI 检测到 Npcap 时优先选择原生后台；缺失时尝试现有 WSL。Linux 原生运行需系统 libpcap、Python/Tk 与抓包权限。WSL 模式要求现有发行版具备 Python 3.10+、libpcap 和抓包权限。")
-    p("可通过环境变量 WIRESCOPE_WSL_DISTRO 指定已有发行版。程序不会安装 WSL 或自动修改系统权限。可选进程关联依赖 psutil：python -m pip install -r requirements.txt；无法读取 socket 表时仍能抓包。")
+    p("可通过环境变量 WIRESCOPE_WSL_DISTRO 指定已有发行版。程序不会安装 WSL 或自动修改系统权限。Windows 进程关联可安装 psutil（requirements.txt）；Linux/WSL 无 psutil 时自动使用 /proc。无法读取 socket 表时仍能抓包。")
     h("GUI 真实抓包复现")
     p("① 选择标有 Loopback 的接口；② BPF 填写 tcp port 18080；③ 开始捕获；④ 点击“产生回环测试流量”；⑤ 等待请求完成后停止；⑥ 显示过滤填写 http；⑦ 双击请求追踪 TCP 流；⑧ 保存全部为 PCAPNG。WSL 后台的测试流量也在同一 WSL 中产生。")
     h("命令行验证与自动测试")
-    code("python run.py --interfaces\npython run.py --capture loopback --bpf \"tcp port 18080\" --seconds 15 --out live.pcapng\n# 捕获期间在第二个终端运行：\npython run.py --test-traffic\npython -m unittest discover -s tests -v\npython tools/verify_live.py\npython tools/verify_gui.py")
+    code("python run.py --interfaces\npython run.py --capture loopback --bpf \"tcp port 18080\" --seconds 15 --out live.pcapng\n# 捕获期间在第二个终端运行：\npython run.py --test-traffic\npython tools/verify_units.py\npython tools/verify_live.py\npython tools/verify_gui.py\n# 在具备 libpcap 和抓包权限的 Linux/WSL 项目目录中：\npython3 tools/verify_processes.py")
     p("打开与保存快捷键为 Ctrl+O / Ctrl+S，Ctrl+L 定位显示过滤。重新运行验证会更新 evidence 中对应的本地测试输出。","small")
 
-    page("08  边界处理与改进方向")
+    page("09  边界处理与改进方向")
     h("有界输入与清晰反馈")
     p("协议头每次读取前校验剩余长度；解析错误保存在 Diagnostics，并保留原始字节。PCAP/PCAPNG 验证魔数、版本、包长、块尾长度、接口编号和时间分辨率。导出先写同目录临时文件，再原子替换目标，避免写到一半损坏已有文件。")
     table(["资源 / 能力","当前边界"],[
@@ -234,7 +246,7 @@ def build(output=None,metadata=None):
         ("TCP 重组","每方向最多 2 MiB；冲突保留先捕获字节；时序图最多显示前 500 包"),
         ("PCAPNG","支持 section/interface/enhanced packet；旧式 Packet/Simple Packet Block 返回明确错误"),
         ("网络与应用协议","IP 分片保留而不重组；不解析 HTTP/2、QUIC；TLS 不解密；校验和只展示不判定"),
-        ("进程归属","可选 psutil 周期性精确 TCP 端点快照；短连接、权限和时间差可导致关联缺失"),
+        ("进程归属","psutil 或 Linux /proc 精确 TCP 端点快照；短连接、权限和时间差可导致关联缺失；PCAP 本身不含 PID"),
         ("平台验证","Windows GUI + WSL 抓包已实测；本机 Windows Npcap 路径未实测")
     ],[114,WIDTH-114])
     h("设计取舍")
@@ -242,7 +254,7 @@ def build(output=None,metadata=None):
     h("后续可以增加的功能")
     p("可在现有模型上增加 IP 分片重组、跨 TCP 段的应用协议状态机、DNS/TLS 多消息处理，以及基于连接超时的流切分。进程快照也可迁移为平台专用连接事件，以降低采集时序导致的关联遗漏。")
 
-    page("09  提交组织、Git 与参考资料")
+    page("10  提交组织、Git 与参考资料")
     p("按讲义第 3 页组织 ZIP，包含一份源码目录、一份 MP4 演示、一份 PDF 报告；说明统一写入报告，不另放 README。当前个人信息使用占位值，报告中的远程仓库链接也需在提交前补入。讲义要求 2026 年 11 月 24 日 23:55 前上传课程网站。")
     code("姓名_学号_EX1A/\n  姓名_学号_ex1A_src/\n  姓名_学号_ex1A_play.mp4\n  姓名_学号_ex1A_report.pdf")
     h("本地版本记录与最终打包")
