@@ -255,14 +255,14 @@ def build(output=None,metadata=None):
     p("可在现有模型上增加 IP 分片重组、跨 TCP 段的应用协议状态机、DNS/TLS 多消息处理，以及基于连接超时的流切分。进程快照也可迁移为平台专用连接事件，以降低采集时序导致的关联遗漏。")
 
     page("10  提交组织、Git 与参考资料")
-    p("按讲义第 3 页组织 ZIP，包含一份源码目录、一份 MP4 演示、一份 PDF 报告；说明统一写入报告，不另放 README。当前个人信息使用占位值，报告中的远程仓库链接也需在提交前补入。讲义要求 2026 年 11 月 24 日 23:55 前上传课程网站。")
+    p("按讲义第 3 页组织 ZIP，包含一份源码目录、一份 MP4 演示、一份 PDF 报告。说明统一写入报告，不另放 README。姓名、学号和公开 GitHub 仓库信息已经填入，讲义要求在 2026 年 11 月 24 日 23:55 前上传课程网站。")
     code("姓名_学号_EX1A/\n  姓名_学号_ex1A_src/\n  姓名_学号_ex1A_play.mp4\n  姓名_学号_ex1A_report.pdf")
     h("本地版本记录与最终打包")
-    p("源码已建立本地 Git 仓库并分阶段提交。提交包附带 history.bundle，可通过 git clone history.bundle restored 恢复本地版本历史。远程仓库尚未由用户指定或发布；本地历史不能替代讲义要求的远程 Git 链接。")
-    code('git remote add origin <你的仓库地址>\ngit push -u origin main\n# 填好 docs/submission.json 后，在安装报告依赖的 Python 中运行：\npython tools/pack_submission.py')
+    p("源码已建立本地 Git 仓库并分阶段提交。提交包附带 history.bundle，可通过 git clone history.bundle restored 恢复本地版本历史。公开 GitHub 仓库已发布，地址为 https://github.com/soyo867/experiment1-sniffer；本地 history.bundle 同时保留完整版本历史。")
+    code('git remote -v\n# 当前公开仓库\nhttps://github.com/soyo867/experiment1-sniffer\npython tools/pack_submission.py')
     p("打包工具会根据 submission.json 重建 PDF，并按姓名、学号生成 ZIP；报告生成需要 requirements-dev.txt 中的依赖与中文字体。程序核心运行不需要这些报告/视频依赖。")
     h("AI 辅助说明与源码阅读建议")
-    p("程序、测试与报告由 AI 助手协助实现。建议提交者依次阅读 capture.py、protocols.py、filters.py 与 streams.py，运行测试并对照原始字节解释关键字段，理解讲义第 65 页强调的核心模块学习目标。报告没有填写未经提供的姓名、学号，也没有把合成样例作为真实网络观测。")
+    p("程序、测试与报告由 AI 助手协助实现。建议提交者依次阅读 capture.py、protocols.py、filters.py 与 streams.py，运行测试并对照原始字节解释关键字段，理解讲义第 65 页强调的核心模块学习目标。报告已填写姓名、学号和公开仓库地址，并明确区分真实网络观测与合成样例。")
     h("参考资料")
     references = [
         ("[1] 刘鹏，《实验 1 讲解 2026》，第 2–3、5、9、14–15、65 页。",None),

@@ -63,6 +63,6 @@ test_listener_zero_inode_and_malformed_rows_ignored (test_processes.SnapshotTest
 test_vanished_and_unrelated_fds (test_processes.SnapshotTests.test_vanished_and_unrelated_fds) ... ok
 
 ----------------------------------------------------------------------
-Ran 63 tests in 0.284s
+Ran 63 tests in 0.438s
 
 OK
