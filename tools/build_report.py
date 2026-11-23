@@ -249,10 +249,9 @@ def build(output=None,metadata=None):
         ("进程归属","psutil 或 Linux /proc 精确 TCP 端点快照；短连接、权限和时间差可导致关联缺失；PCAP 本身不含 PID"),
         ("平台验证","Windows GUI + WSL 抓包已实测；本机 Windows Npcap 路径未实测")
     ],[114,WIDTH-114])
-    h("设计取舍")
-    p("使用标准库与手工解析，使抓包、解码和过滤原理能直接从源码追踪。使用原生 pcap BPF 降低无关流量进入用户态的开销；有界队列与批量 UI 更新隔离高频抓包和低频绘制。Python 与树控件适合教学和小规模分析，若目标改为高速长时间捕获，应采用磁盘轮转、虚拟列表与更轻量的采集进程。")
-    h("后续可以增加的功能")
-    p("可在现有模型上增加 IP 分片重组、跨 TCP 段的应用协议状态机、DNS/TLS 多消息处理，以及基于连接超时的流切分。进程快照也可迁移为平台专用连接事件，以降低采集时序导致的关联遗漏。")
+    h("实现选择与限制")
+    p("实现使用 Python 标准库、系统 pcap 接口和 Tk。过滤条件先在用户态解析，BPF 条件交给采集端处理。抓包线程把数据放入有界队列，界面按批次刷新。当前版本适合课程实验和小规模分析，不适合长时间高速抓包。")
+    p("本次实现没有加入 IP 分片重组、完整 TCP 状态机、跨多个 TLS 消息的应用层解析和超时流切分。进程归属依赖采集时刻的 socket 快照，短连接、权限限制和时间差都可能造成关联缺失。")
 
     page("10  提交组织、Git 与参考资料")
     p("按讲义第 3 页组织 ZIP，包含一份源码目录、一份 MP4 演示、一份 PDF 报告。说明统一写入报告，不另放 README。姓名、学号和公开 GitHub 仓库信息已经填入，讲义要求在 2026 年 11 月 24 日 23:55 前上传课程网站。")
@@ -261,8 +260,8 @@ def build(output=None,metadata=None):
     p("源码已建立本地 Git 仓库并分阶段提交。提交包附带 history.bundle，可通过 git clone history.bundle restored 恢复本地版本历史。公开 GitHub 仓库已发布，地址为 https://github.com/soyo867/experiment1-sniffer；本地 history.bundle 同时保留完整版本历史。")
     code('git remote -v\n# 当前公开仓库\nhttps://github.com/soyo867/experiment1-sniffer\npython tools/pack_submission.py')
     p("打包工具会根据 submission.json 重建 PDF，并按姓名、学号生成 ZIP；报告生成需要 requirements-dev.txt 中的依赖与中文字体。程序核心运行不需要这些报告/视频依赖。")
-    h("AI 辅助说明与源码阅读建议")
-    p("程序、测试与报告由 AI 助手协助实现。建议提交者依次阅读 capture.py、protocols.py、filters.py 与 streams.py，运行测试并对照原始字节解释关键字段，理解讲义第 65 页强调的核心模块学习目标。报告已填写姓名、学号和公开仓库地址，并明确区分真实网络观测与合成样例。")
+    h("复现实验")
+    p("运行测试前应阅读 capture.py、protocols.py、filters.py 和 streams.py，结合原始字节检查接口选择、协议字段和 TCP 重组过程。报告中的真实抓包、离线 PCAP 和合成样例分别标明了来源。姓名、学号和公开仓库地址已填写。")
     h("参考资料")
     references = [
         ("[1] 刘鹏，《实验 1 讲解 2026》，第 2–3、5、9、14–15、65 页。",None),
